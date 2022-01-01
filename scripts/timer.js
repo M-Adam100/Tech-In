@@ -82,6 +82,7 @@ console.log("Running Script");
     const navBar = document.querySelector('div[class^="navbar-right-container"]');
     navBar.insertBefore(stopwatch, navBar.firstChild);
     stopwatch.append(startProblem);
+  document.getElementById('stopwatch').style.display = 'none';
     document.querySelector('button#startProblem').addEventListener('click', () => {
       startProblem.innerHTML = `<div class="stepDiv"><span>Problem Solving</span><input id="problemSolving" type="checkbox"></input></div>`;
       document.querySelector('input#problemSolving').addEventListener('change', () => {
