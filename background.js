@@ -3,11 +3,10 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.action.onClicked.addListener(function(tab) {
-    console.log(tab);
     chrome.scripting.insertCSS(
         {
           target: {tabId: tab.id},
-          css: "styles/style.css",
+          files: ["styles/style.css"]
         },
         () => { console.log('CSS Injected') });
     chrome.scripting.executeScript(
@@ -16,5 +15,13 @@ chrome.action.onClicked.addListener(function(tab) {
           files: ['scripts/timer.js']
         },
         () => { console.log("Executed Script")});
-    
+        
 });
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.type == "timerData")
+     chrome.tabs.create({url: chrome.runtime.getURL('result.html')}, (tab => {
+         console.log("Tab Opened");
+     }));
+ 
+ });

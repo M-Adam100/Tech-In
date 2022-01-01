@@ -1,0 +1,116 @@
+<html>
+<head>
+<style>
+#customers {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#customers tr:nth-child(even){background-color: #f2f2f2;}
+
+#customers tr:hover {background-color: #ddd;}
+
+#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background-color: #262638;
+  color: white;
+}
+.bar {
+  border: 1px solid #ccc!important;
+    width: 500px;
+    height: 20px;
+    margin-right: 75px;
+    margin-left: 75px;
+}
+
+.progress {
+	color: #000!important;
+  background-color: #787a79!important;
+}
+
+.times {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.title {
+  width: 100px;
+}
+</style>
+</head>
+<body>
+<table id="customers">
+  <tr>
+    <th>Here's your time breakdown for this question</th>
+  </tr>
+  <tr>
+    <td>
+      <div class="times">
+        <span class="title">
+          Problem Solving Time
+        </span>
+        <div id="problemSolving" class="bar">
+          <div id="problemSolvingProgress" class="progress" style="height:20px"></div>
+        </div>
+        <span class="title" id="problemSolvingTime">
+        </span>
+      </div>
+     </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="times">
+        <span class="title">
+         Coding Time
+        </span>
+        <div id="coding" class="bar">
+          <div id="codingProgress" class="progress" style="height:20px;width:100%"></div>
+        </div>
+        <span class="title" id="codingTime">
+        </span>
+      </div>
+     </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="times">
+        <span class="title">
+         Debugging Time
+        </span>
+        <div id="debugging" class="bar">
+          <div id="debuggingProgress" class="progress" style="height:20px;width:100%"></div>
+        </div>
+        <span class="title" id="debuggingTime">
+        </span>
+      </div>
+     </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="times">
+        <span class="title">
+         Total Time
+        </span>
+        <div id="total" class="bar">
+          <div id="totalProgress" class="progress" style="height:20px;width:100%"></div>
+        </div>
+        <span class="title" id="totalTime">
+        </span>
+      </div>
+     </td>
+  </tr>
+</table>
+
+<script type="text/javascript" src="result.js"></script>
+
+
+</body>
+</html>
+
