@@ -2,6 +2,35 @@ console.log("Running Script");
 
 (async () => {
 
+  const getAudio = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        const audioChunks = [];
+        mediaRecorder.addEventListener("dataavailable", event => {
+          audioChunks.push(event.data);
+        });
+
+        mediaRecorder.addEventListener("stop", () => {
+          const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+          console.log(audioBlob);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          chrome.storage.local.set({
+            'recordings': {
+              problemSolvingTime: audioUrl,
+            }
+          })
+
+        });
+
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, 5000);
+      });
+  }
+
   var hr = 0;
   var min = 0;
   var sec = 0;
@@ -53,8 +82,8 @@ console.log("Running Script");
         hr = '0' + hr;
       }
 
-      timer.innerHTML = hr + ':' + min + ':' + sec;
-
+      if (timer) timer.innerHTML = hr + ':' + min + ':' + sec;
+    
       setTimeout(() => {
         timerCycle();
       }, 1000);
@@ -82,8 +111,9 @@ console.log("Running Script");
     const navBar = document.querySelector('div[class^="navbar-right-container"]');
     navBar.insertBefore(stopwatch, navBar.firstChild);
     stopwatch.append(startProblem);
-  document.getElementById('stopwatch').style.display = 'none';
+    document.getElementById('stopwatch').style.display = 'none';
     document.querySelector('button#startProblem').addEventListener('click', () => {
+      getAudio();
       startProblem.innerHTML = `<div class="stepDiv"><span>Problem Solving</span><input id="problemSolving" type="checkbox"></input></div>`;
       document.querySelector('input#problemSolving').addEventListener('change', () => {
         startProblem.innerHTML = `<div class="stepDiv"><span>Coding</span><input id="coding" type="checkbox"></input></div>`
@@ -102,7 +132,7 @@ console.log("Running Script");
               }
             })
 
-           stopwatch.remove();
+            stopwatch.remove();
 
             chrome.runtime.sendMessage({
               type: "timerData",

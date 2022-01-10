@@ -53,6 +53,8 @@
   </tr>
   <tr>
     <td>
+  <div id="audio-spectrum"></div>
+
       <div class="times">
         <span class="title">
           Problem Solving Time
@@ -60,8 +62,10 @@
         <div id="problemSolving" class="bar">
           <div id="problemSolvingProgress" class="progress" style="height:20px"></div>
         </div>
-        <span class="title" id="problemSolvingTime">
+       
+        <span class="title" id="problemSolvingTime">    
         </span>
+        <a id="problemSolvingAudio" download="problemSolving.wav">Export Audio</a>
       </div>
      </td>
   </tr>
@@ -108,7 +112,7 @@
      </td>
   </tr>
 </table>
-
+<script type="text/javascript" src="./scripts/wavesurfer.min.js"></script>
 <script type="text/javascript" src="result.js"></script>
 
 
