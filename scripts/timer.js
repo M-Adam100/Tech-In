@@ -5,9 +5,11 @@ console.log("Running Script");
 
   const stopAudio = () => {
     navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => { 
-      stream.stop();
-    })
+      .then(stream => {
+        stream.getTracks().forEach(function (track) {
+            track.stop();
+        });
+      })
   }
 
   const getAudio = (selector) => {
@@ -22,7 +24,7 @@ console.log("Running Script");
         });
 
         mediaRecorder.addEventListener("stop", () => {
-          const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
           const audioUrl = URL.createObjectURL(audioBlob);
           chrome.storage.local.set({
             [selector]: {
@@ -86,7 +88,7 @@ console.log("Running Script");
       }
 
       if (timer) timer.innerHTML = hr + ':' + min + ':' + sec;
-    
+
       setTimeout(() => {
         timerCycle();
       }, 1000);
@@ -141,6 +143,7 @@ console.log("Running Script");
             })
 
             stopwatch.remove();
+            stopAudio();
 
             chrome.runtime.sendMessage({
               type: "timerData",
