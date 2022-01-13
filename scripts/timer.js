@@ -1,11 +1,12 @@
 console.log("Running Script");
 
 (async () => {
+  let mediaRecorder;
 
-  const getAudio = () => {
+  const getAudio = (selector) => {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
-        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
 
         const audioChunks = [];
@@ -18,16 +19,12 @@ console.log("Running Script");
           console.log(audioBlob);
           const audioUrl = URL.createObjectURL(audioBlob);
           chrome.storage.local.set({
-            'recordings': {
-              problemSolvingTime: audioUrl,
+            [selector]: {
+              audioUrl: audioUrl
             }
           })
 
         });
-
-        setTimeout(() => {
-          mediaRecorder.stop();
-        }, 5000);
       });
   }
 
@@ -113,17 +110,22 @@ console.log("Running Script");
     stopwatch.append(startProblem);
     document.getElementById('stopwatch').style.display = 'none';
     document.querySelector('button#startProblem').addEventListener('click', () => {
-      getAudio();
+      getAudio('problemSolvingAudio');
       startProblem.innerHTML = `<div class="stepDiv"><span>Problem Solving</span><input id="problemSolving" type="checkbox"></input></div>`;
       document.querySelector('input#problemSolving').addEventListener('change', () => {
+        mediaRecorder.stop();
+        getAudio('codingAudio');
         startProblem.innerHTML = `<div class="stepDiv"><span>Coding</span><input id="coding" type="checkbox"></input></div>`
         problemSolvingTime = document.getElementById('stopwatch').innerText;
         document.querySelector('input#coding').addEventListener('change', () => {
+          mediaRecorder.stop();
+          getAudio('debuggingAudio');
           startProblem.innerHTML = `<div class="stepDiv"><span>Debugging</span><input id="debugging" type="checkbox"></input></div>`;
           codingTime = document.getElementById('stopwatch').innerText;
 
           document.querySelector('input#debugging').addEventListener('click', () => {
             debuggingTime = document.getElementById('stopwatch').innerText;
+            mediaRecorder.stop();
             chrome.storage.local.set({
               'times': {
                 problemSolvingTime,

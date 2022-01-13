@@ -1,6 +1,98 @@
 console.log("Executing Result Script");
 
 (async () => {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContext();
+
+const drawAudio = async (selector,blob) => {
+    const buffer = await blob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(buffer);
+    draw(normalizeData(filterData(audioBuffer)), selector)
+};
+
+/**
+ * Filters the AudioBuffer retrieved from an external source
+ * @param {AudioBuffer} audioBuffer the AudioBuffer from drawAudio()
+ * @returns {Array} an array of floating point numbers
+ */
+const filterData = audioBuffer => {
+  const rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
+  const samples = 70; // Number of samples we want to have in our final data set
+  const blockSize = Math.floor(rawData.length / samples); // the number of samples in each subdivision
+  const filteredData = [];
+  for (let i = 0; i < samples; i++) {
+    let blockStart = blockSize * i; // the location of the first sample in the block
+    let sum = 0;
+    for (let j = 0; j < blockSize; j++) {
+      sum = sum + Math.abs(rawData[blockStart + j]); // find the sum of all the samples in the block
+    }
+    filteredData.push(sum / blockSize); // divide the sum by the block size to get the average
+  }
+  return filteredData;
+};
+
+/**
+ * Normalizes the audio data to make a cleaner illustration 
+ * @param {Array} filteredData the data from filterData()
+ * @returns {Array} an normalized array of floating point numbers
+ */
+const normalizeData = filteredData => {
+    const multiplier = Math.pow(Math.max(...filteredData), -1);
+    return filteredData.map(n => n * multiplier);
+}
+
+/**
+ * Draws the audio file into a canvas element.
+ * @param {Array} normalizedData The filtered array returned from filterData()
+ * @returns {Array} a normalized array of data
+ */
+const draw = (normalizedData, selector) => {
+  // set up the canvas
+  const canvas = document.querySelector(`canvas#${selector}`);
+  const dpr =  window.devicePixelRatio;
+  const padding = 1;
+  console.log(canvas.offsetHeight, canvas.offsetWidth);
+  //canvas.width = canvas.offsetWidth * dpr;
+  canvas.width = canvas.offsetWidth * dpr;
+  canvas.height = (canvas.offsetHeight + padding * 2) * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  ctx.translate(0, canvas.offsetHeight / 2 + padding); // set Y = 0 to be in the middle of the canvas
+
+  const width = canvas.offsetWidth / normalizedData.length;
+  for (let i = 0; i < normalizedData.length; i++) {
+    const x = width * i;
+    let height = normalizedData[i] * canvas.offsetHeight - padding;
+    if (height < 0) {
+        height = 0;
+    } else if (height > canvas.offsetHeight / 2) {
+        height = height > canvas.offsetHeight / 2;
+    }
+    drawLineSegment(ctx, x, height, width, (i + 1) % 2);
+  }
+};
+
+/**
+ * A utility function for drawing our line segments
+ * @param {AudioContext} ctx the audio context 
+ * @param {number} x  the x coordinate of the beginning of the line segment
+ * @param {number} height the desired height of the line segment
+ * @param {number} width the desired width of the line segment
+ * @param {boolean} isEven whether or not the segmented is even-numbered
+ */
+const drawLineSegment = (ctx, x, height, width, isEven) => {
+  ctx.lineWidth = 1; // how thick the line is
+  ctx.strokeStyle = "#3B5998"; // what color our line is
+  ctx.beginPath();
+  height = isEven ? height : -height;
+  ctx.moveTo(x, 0);
+  ctx.lineTo(x, height);
+  ctx.arc(x + width / 2, height, width / 2, Math.PI, 0, isEven);
+  ctx.lineTo(x + width, 0);
+  ctx.stroke();
+};
+
+
 
     const getTotalSeconds = (hms) => {
         const [hours, minutes, seconds] = hms.split(':');
@@ -15,23 +107,40 @@ console.log("Executing Result Script");
 
 
 
-    chrome.storage.local.get(['times', 'recordings'], async CS => {
+    chrome.storage.local.get(['times', 'problemSolvingAudio', 'codingAudio', 'debuggingAudio'], async CS => {
 
-        var Spectrum = WaveSurfer.create({
-            container: '#audio-spectrum',
-            waveColor: 'violet',
-        });
+        // var Spectrum = WaveSurfer.create({
+        //     container: '#audio-spectrum',
+        //     waveColor: 'violet',
+        // });
 
-        Spectrum.on("ready", function () {
-            console.log("Loaded");
-            // Do something when the file has been loaded
+        // Spectrum.on("ready", function () {
+        //     console.log("Loaded");
+        //     // Do something when the file has been loaded
 
-            // Do whatever you need to do with the player
-            Spectrum.play();
-            Spectrum.pause();
-            Spectrum.stop();
-        });
-        Spectrum.load(CS.recordings.problemSolvingTime);
+        //     // Do whatever you need to do with the player
+        //     Spectrum.play();
+        //     Spectrum.pause();
+        //     Spectrum.stop();
+        // });
+        console.log(CS);
+        let blob = await fetch(CS.problemSolvingAudio.audioUrl).then(r => r.blob());
+
+        //Spectrum.load();
+        drawAudio("problemSolvingAudio", blob);
+
+        blob = await fetch(CS.codingAudio.audioUrl).then(r => r.blob());
+
+        //Spectrum.load();
+        drawAudio("codingAudio", blob);
+
+        blob = await fetch(CS.debuggingAudio.audioUrl).then(r => r.blob());
+
+        //Spectrum.load();
+        drawAudio("debuggingAudio", blob);
+
+
+        
         // Load the audio file from your own domain !
         const totalTime = document.querySelector('#totalTime');
         const problemSolvingSeconds = getTotalSeconds(CS.times.problemSolvingTime);
@@ -40,7 +149,6 @@ console.log("Executing Result Script");
         console.log({ problemSolvingSeconds, codingSeconds, debuggingSeconds });
         const totalSeconds = problemSolvingSeconds + codingSeconds + debuggingSeconds;
 
-        document.querySelector('a').setAttribute('href', CS.recordings.problemSolvingTime)
 
         totalTime.innerText = setTime(totalSeconds);
 
@@ -53,14 +161,14 @@ console.log("Executing Result Script");
         const debuggingTime = document.querySelector('#debuggingTime');
         debuggingTime.innerText = setTime(debuggingSeconds);
 
-        const problemSolvingProgress = document.querySelector('#problemSolvingProgress');
+        const problemSolvingProgress = document.querySelector('#problemSolvingAudio');
         problemSolvingProgress.style.width = (problemSolvingSeconds / totalSeconds) * 100 + '%';
 
-        const codingProgress = document.querySelector('#codingProgress');
+        const codingProgress = document.querySelector('#codingAudio');
         codingProgress.style.marginLeft = problemSolvingProgress.style.width;
         codingProgress.style.width = (codingSeconds / totalSeconds) * 100 + '%';
 
-        const debuggingProgress = document.querySelector('#debuggingProgress');
+        const debuggingProgress = document.querySelector('#debuggingAudio');
         debuggingProgress.style.marginLeft = (problemSolvingSeconds / totalSeconds) * 100 + (codingSeconds / totalSeconds) * 100 + '%';
         debuggingProgress.style.width = (debuggingSeconds / totalSeconds) * 100 + '%';
 

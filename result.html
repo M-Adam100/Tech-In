@@ -20,20 +20,21 @@
 #customers th {
   padding-top: 12px;
   padding-bottom: 12px;
-  background-color: #262638;
+  background-color: #3B5998;
   color: white;
 }
 .bar {
-  border: 1px solid #ccc!important;
+    border: 1px solid #ccc!important;
     width: 500px;
-    height: 20px;
+    height: 45px;
     margin-right: 75px;
     margin-left: 75px;
+    display: flex;
 }
 
 .progress {
 	color: #000!important;
-  background-color: #787a79!important;
+  background-color: #3B5998!important;
 }
 
 .times {
@@ -43,29 +44,33 @@
 }
 .title {
   width: 100px;
+  align-self: center;
 }
 </style>
 </head>
 <body>
+
 <table id="customers">
   <tr>
-    <th>Here's your time breakdown for this question</th>
+    <th>Here's your time and communication breakdown for this question</th>
   </tr>
   <tr>
     <td>
-  <div id="audio-spectrum"></div>
 
       <div class="times">
         <span class="title">
           Problem Solving Time
         </span>
+  <!-- <div id="audio-spectrum"></div> -->
+  
         <div id="problemSolving" class="bar">
-          <div id="problemSolvingProgress" class="progress" style="height:20px"></div>
+          <canvas id="problemSolvingAudio"></canvas>
+          <!-- <div id="problemSolvingProgress" class="progress" style="height:20px"></div> -->
         </div>
+
        
         <span class="title" id="problemSolvingTime">    
         </span>
-        <a id="problemSolvingAudio" download="problemSolving.wav">Export Audio</a>
       </div>
      </td>
   </tr>
@@ -76,7 +81,8 @@
          Coding Time
         </span>
         <div id="coding" class="bar">
-          <div id="codingProgress" class="progress" style="height:20px;width:100%"></div>
+          <!-- <div id="codingProgress" class="progress" style="height:20px;width:100%"></div> -->
+          <canvas id="codingAudio"></canvas>
         </div>
         <span class="title" id="codingTime">
         </span>
@@ -90,7 +96,8 @@
          Debugging Time
         </span>
         <div id="debugging" class="bar">
-          <div id="debuggingProgress" class="progress" style="height:20px;width:100%"></div>
+          <!-- <div id="debuggingProgress" class="progress" style="height:20px;width:100%"></div> -->
+          <canvas id="debuggingAudio"></canvas>
         </div>
         <span class="title" id="debuggingTime">
         </span>
@@ -104,7 +111,7 @@
          Total Time
         </span>
         <div id="total" class="bar">
-          <div id="totalProgress" class="progress" style="height:20px;width:100%"></div>
+          <div id="totalProgress" class="progress" style="height:100%;width:100%"></div>
         </div>
         <span class="title" id="totalTime">
         </span>
