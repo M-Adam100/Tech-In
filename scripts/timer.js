@@ -3,6 +3,13 @@ console.log("Running Script");
 (async () => {
   let mediaRecorder;
 
+  const stopAudio = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => { 
+      stream.stop();
+    })
+  }
+
   const getAudio = (selector) => {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
@@ -16,7 +23,6 @@ console.log("Running Script");
 
         mediaRecorder.addEventListener("stop", () => {
           const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
-          console.log(audioBlob);
           const audioUrl = URL.createObjectURL(audioBlob);
           chrome.storage.local.set({
             [selector]: {

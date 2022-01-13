@@ -9,55 +9,37 @@ const drawAudio = async (selector,blob) => {
     const audioBuffer = await audioContext.decodeAudioData(buffer);
     draw(normalizeData(filterData(audioBuffer)), selector)
 };
-
-/**
- * Filters the AudioBuffer retrieved from an external source
- * @param {AudioBuffer} audioBuffer the AudioBuffer from drawAudio()
- * @returns {Array} an array of floating point numbers
- */
 const filterData = audioBuffer => {
-  const rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
-  const samples = 70; // Number of samples we want to have in our final data set
-  const blockSize = Math.floor(rawData.length / samples); // the number of samples in each subdivision
+  const rawData = audioBuffer.getChannelData(0); 
+  const samples = 70; 
+  const blockSize = Math.floor(rawData.length / samples); 
   const filteredData = [];
   for (let i = 0; i < samples; i++) {
-    let blockStart = blockSize * i; // the location of the first sample in the block
+    let blockStart = blockSize * i; 
     let sum = 0;
     for (let j = 0; j < blockSize; j++) {
-      sum = sum + Math.abs(rawData[blockStart + j]); // find the sum of all the samples in the block
+      sum = sum + Math.abs(rawData[blockStart + j]); 
     }
-    filteredData.push(sum / blockSize); // divide the sum by the block size to get the average
+    filteredData.push(sum / blockSize); 
   }
   return filteredData;
 };
 
-/**
- * Normalizes the audio data to make a cleaner illustration 
- * @param {Array} filteredData the data from filterData()
- * @returns {Array} an normalized array of floating point numbers
- */
 const normalizeData = filteredData => {
     const multiplier = Math.pow(Math.max(...filteredData), -1);
     return filteredData.map(n => n * multiplier);
 }
 
-/**
- * Draws the audio file into a canvas element.
- * @param {Array} normalizedData The filtered array returned from filterData()
- * @returns {Array} a normalized array of data
- */
 const draw = (normalizedData, selector) => {
-  // set up the canvas
+ 
   const canvas = document.querySelector(`canvas#${selector}`);
-  const dpr =  window.devicePixelRatio;
+  const dpr =  window.devicePixelRatio || 1;
   const padding = 1;
-  console.log(canvas.offsetHeight, canvas.offsetWidth);
-  //canvas.width = canvas.offsetWidth * dpr;
   canvas.width = canvas.offsetWidth * dpr;
   canvas.height = (canvas.offsetHeight + padding * 2) * dpr;
   const ctx = canvas.getContext("2d");
   ctx.scale(dpr, dpr);
-  ctx.translate(0, canvas.offsetHeight / 2 + padding); // set Y = 0 to be in the middle of the canvas
+  ctx.translate(0, canvas.offsetHeight / 2 + padding);
 
   const width = canvas.offsetWidth / normalizedData.length;
   for (let i = 0; i < normalizedData.length; i++) {
@@ -72,16 +54,8 @@ const draw = (normalizedData, selector) => {
   }
 };
 
-/**
- * A utility function for drawing our line segments
- * @param {AudioContext} ctx the audio context 
- * @param {number} x  the x coordinate of the beginning of the line segment
- * @param {number} height the desired height of the line segment
- * @param {number} width the desired width of the line segment
- * @param {boolean} isEven whether or not the segmented is even-numbered
- */
 const drawLineSegment = (ctx, x, height, width, isEven) => {
-  ctx.lineWidth = 1; // how thick the line is
+  ctx.lineWidth = 1; 
   ctx.strokeStyle = "#3B5998"; // what color our line is
   ctx.beginPath();
   height = isEven ? height : -height;
@@ -109,34 +83,16 @@ const drawLineSegment = (ctx, x, height, width, isEven) => {
 
     chrome.storage.local.get(['times', 'problemSolvingAudio', 'codingAudio', 'debuggingAudio'], async CS => {
 
-        // var Spectrum = WaveSurfer.create({
-        //     container: '#audio-spectrum',
-        //     waveColor: 'violet',
-        // });
-
-        // Spectrum.on("ready", function () {
-        //     console.log("Loaded");
-        //     // Do something when the file has been loaded
-
-        //     // Do whatever you need to do with the player
-        //     Spectrum.play();
-        //     Spectrum.pause();
-        //     Spectrum.stop();
-        // });
-        console.log(CS);
         let blob = await fetch(CS.problemSolvingAudio.audioUrl).then(r => r.blob());
 
-        //Spectrum.load();
         drawAudio("problemSolvingAudio", blob);
 
         blob = await fetch(CS.codingAudio.audioUrl).then(r => r.blob());
 
-        //Spectrum.load();
         drawAudio("codingAudio", blob);
 
         blob = await fetch(CS.debuggingAudio.audioUrl).then(r => r.blob());
 
-        //Spectrum.load();
         drawAudio("debuggingAudio", blob);
 
 
